@@ -1,11 +1,10 @@
-﻿using System;
-using static System.Console;
-using System.Data;
-using System.Data.SqlClient;
+﻿using System.Data;
 using System.Data.Odbc;
 using System.Data.OleDb;
-using System.Configuration;
-
+using System.Data.SqlClient;
+using static System.Configuration.ConfigurationManager;
+using static System.Console;
+using static System.Enum;
 namespace MyConnectionFactory
 {
     // A list of possible providers.
@@ -14,27 +13,25 @@ namespace MyConnectionFactory
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             WriteLine("***** Very Simple Connection Factory *****\n");
             // Read the provider key.
-            string dataProviderString = ConfigurationManager.AppSettings["provider"];
+            string dataProviderString = AppSettings["provider"];
             // Transform string to enum.
-            DataProvider dataProvider = DataProvider.None;
-            if (Enum.IsDefined(typeof(DataProvider), dataProviderString))
+            DataProvider dataProvider;
+            if (IsDefined(typeof(DataProvider), dataProviderString))
             {
-                dataProvider = (DataProvider)Enum.Parse(typeof(DataProvider), dataProviderString);
+                dataProvider = (DataProvider)Parse(typeof(DataProvider), dataProviderString);
+                // Get a specific connection.
+                IDbConnection myConnection = GetConnection(dataProvider);
+                WriteLine($"Your connection is a {myConnection?.GetType().Name ?? "unrecognized type"}");
+                // Open, use and close connection...
             }
             else
             {
                 WriteLine("Sorry, no provider exists!");
-                ReadLine();
-                return;
             }
-            // Get a specific connection.
-            IDbConnection myConnection = GetConnection(dataProvider);
-            WriteLine($"Your connection is a {myConnection?.GetType().Name ?? "unrecognized type"}");
-            // Open, use and close connection...
             ReadLine();
         }
 
